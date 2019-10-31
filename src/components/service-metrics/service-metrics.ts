@@ -11,7 +11,7 @@ export async function viewServiceMetricImage(ctx: IContext, params: IParameters)
     const cmd = new cw.GetMetricWidgetImageCommand({
         MetricWidget: JSON.stringify({
           metrics: [
-            [ "AWS/RDS", params.metricDimension, "DBInstanceIdentifier", "momo-cf" ],
+            [ "AWS/RDS", params.metricDimension, "DBInstanceIdentifier", `rdsbroker-${params.serviceGUID}` ],
           ],
           yAxis: {left: { min: 0} },
           start: "-PT168H",
