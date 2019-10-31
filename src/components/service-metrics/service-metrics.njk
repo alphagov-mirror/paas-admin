@@ -1,0 +1,18 @@
+{% extends "../services/_tabs.njk" %}
+
+{% block pageTitle %}
+  {{ service.entity.name }} - Service Metrics
+{% endblock %}
+
+{% block insideTabs %}
+    <h2 className="govuk-heading-m">Metrics</h2>
+
+    <div className="govuk-grid-row">
+    <div className="govuk-grid-column-one-third">
+        <h3 className="govuk-heading-m">
+        Free disk space
+        </h3>
+
+        <img src="/TODO" alt="Graph showing free disk space over the last week">
+    </div>
+    {% endblock %}
