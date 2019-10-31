@@ -10,9 +10,13 @@ export async function viewServiceMetricImage(ctx: IContext, params: IParameters)
     const cloudWatch = new cw.CloudWatchClient({ region: 'eu-west-1' })
     const cmd = new cw.GetMetricWidgetImageCommand({
         MetricWidget: JSON.stringify({
-          "metrics": [
+          metrics: [
             [ "AWS/RDS", params.metricDimension, "DBInstanceIdentifier", "momo-cf" ],
           ],
+          yAxis: {left: { min: 0} },
+          start: "-PT168H",
+          title: " ",
+          legend: {position: "hidden"},
         })
       })
     const data = await cloudWatch.send(cmd)
