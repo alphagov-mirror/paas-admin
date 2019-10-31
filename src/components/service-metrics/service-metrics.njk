@@ -13,6 +13,10 @@
         Free disk space
         </h3>
 
-        <img src="/TODO" alt="Graph showing free disk space over the last week">
+        <img src="{{
+        linkTo(
+          'admin.organizations.spaces.services.metrics.view.image',
+          {organizationGUID: organization.metadata.guid, spaceGUID: space.metadata.guid, serviceGUID: service.metadata.guid, metricDimension: 'FreeStorageSpace' }
+        ) }}" alt="Graph showing free disk space over the last week">
     </div>
     {% endblock %}

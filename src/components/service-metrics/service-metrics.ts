@@ -4,7 +4,24 @@ import { CLOUD_CONTROLLER_ADMIN, CLOUD_CONTROLLER_GLOBAL_AUDITOR, CLOUD_CONTROLL
 import { IParameters, IResponse } from '../../lib/router';
 import { fromOrg, IBreadcrumb } from '../breadcrumbs';
 import serviceMetricsTemplate from './service-metrics.njk';
+import * as cw from "@aws-sdk/client-cloudwatch-node";
 
+export async function viewServiceMetricImage(ctx: IContext, params: IParameters): Promise<IResponse> {
+    const cloudWatch = new cw.CloudWatchClient({ region: 'eu-west-1' })
+    const cmd = new cw.GetMetricWidgetImageCommand({
+        MetricWidget: JSON.stringify({
+          "metrics": [
+            [ "AWS/RDS", params.metricDimension, "DBInstanceIdentifier", "momo-cf" ],
+          ],
+        })
+      })
+    const data = await cloudWatch.send(cmd)
+
+    return {
+        body: Buffer.from(data.MetricWidgetImage!),
+        mimeType: 'image/png',
+    };
+}
 
 export async function viewServiceMetrics(ctx: IContext, params: IParameters): Promise<IResponse> {
     const cf = new CloudFoundryClient({
