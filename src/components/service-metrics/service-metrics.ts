@@ -24,7 +24,7 @@ export async function viewServiceMetricImage(ctx: IContext, params: IParameters)
     try {
       const data = await cloudWatch.send(cmd);
       if (!data.MetricWidgetImage) {
-        throw new Error('Expected MetricWidgetImage to be set')
+        throw new Error('Expected MetricWidgetImage to be set');
       }
       return {
           body: Buffer.from(data.MetricWidgetImage),
@@ -66,6 +66,9 @@ export async function viewServiceMetrics(ctx: IContext, params: IParameters): Pr
       await cf.userServiceInstance(params.serviceGUID) :
       await cf.serviceInstance(params.serviceGUID);
 
+    const servicePlanName = isUserProvidedService ? 'User Provided Service'
+        : (await cf.servicePlan(service.entity.service_plan_guid)).entity.name;
+
     const breadcrumbs: ReadonlyArray<IBreadcrumb> = fromOrg(ctx, organization, [
         {
             text: space.entity.name,
@@ -84,6 +87,7 @@ export async function viewServiceMetrics(ctx: IContext, params: IParameters): Pr
             context: ctx.viewContext,
             organization,
             service,
+            servicePlanName,
             space,
             isAdmin,
             isBillingManager,
