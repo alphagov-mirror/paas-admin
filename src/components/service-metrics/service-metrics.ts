@@ -7,6 +7,9 @@ import { CLOUD_CONTROLLER_ADMIN, CLOUD_CONTROLLER_GLOBAL_AUDITOR, CLOUD_CONTROLL
 import { fromOrg, IBreadcrumb } from '../breadcrumbs';
 import serviceMetricsTemplate from './service-metrics.njk';
 
+// Ignoring test coverage of viewServiceMetricImage because this is temporary code,
+// to be replaced with properly rendered SVG graphs at a later date.
+/* istanbul ignore next */
 export async function viewServiceMetricImage(ctx: IContext, params: IParameters): Promise<IResponse> {
     const cloudWatch = new cw.CloudWatchClient({ region: 'eu-west-1' });
     const cmd = new cw.GetMetricWidgetImageCommand({
