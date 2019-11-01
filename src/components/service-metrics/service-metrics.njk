@@ -20,6 +20,61 @@
         {organizationGUID: organization.metadata.guid, spaceGUID: space.metadata.guid, serviceGUID: service.metadata.guid, metricDimension: 'FreeStorageSpace' }
         ) }}" alt="Graph showing free disk space over the last week">
     </div>
+    <div className="govuk-grid-column-one-third">
+        <h3 className="govuk-heading-m">
+        CPU Utilisation
+        </h3>
+
+        <img src="{{
+        linkTo(
+        'admin.organizations.spaces.services.metrics.view.image',
+        {organizationGUID: organization.metadata.guid, spaceGUID: space.metadata.guid, serviceGUID: service.metadata.guid, metricDimension: 'CPUUtilization' }
+        ) }}" alt="Graph showing free disk space over the last week">
+    </div>
+    <div className="govuk-grid-column-one-third">
+        <h3 className="govuk-heading-m">
+        Database Connections
+        </h3>
+
+        <img src="{{
+        linkTo(
+        'admin.organizations.spaces.services.metrics.view.image',
+        {organizationGUID: organization.metadata.guid, spaceGUID: space.metadata.guid, serviceGUID: service.metadata.guid, metricDimension: 'DatabaseConnections' }
+        ) }}" alt="Graph showing free disk space over the last week">
+    </div>
+    <div className="govuk-grid-column-one-third">
+        <h3 className="govuk-heading-m">
+        Freeable Memory
+        </h3>
+
+        <img src="{{
+        linkTo(
+        'admin.organizations.spaces.services.metrics.view.image',
+        {organizationGUID: organization.metadata.guid, spaceGUID: space.metadata.guid, serviceGUID: service.metadata.guid, metricDimension: 'FreeableMemory' }
+        ) }}" alt="Graph showing free disk space over the last week">
+    </div>
+    <div className="govuk-grid-column-one-third">
+        <h3 className="govuk-heading-m">
+        Read IOPS
+        </h3>
+
+        <img src="{{
+        linkTo(
+        'admin.organizations.spaces.services.metrics.view.image',
+        {organizationGUID: organization.metadata.guid, spaceGUID: space.metadata.guid, serviceGUID: service.metadata.guid, metricDimension: 'ReadIOPS' }
+        ) }}" alt="Graph showing free disk space over the last week">
+    </div>
+    <div className="govuk-grid-column-one-third">
+        <h3 className="govuk-heading-m">
+        Write IOPS
+        </h3>
+
+        <img src="{{
+        linkTo(
+        'admin.organizations.spaces.services.metrics.view.image',
+        {organizationGUID: organization.metadata.guid, spaceGUID: space.metadata.guid, serviceGUID: service.metadata.guid, metricDimension: 'WriteIOPS' }
+        ) }}" alt="Graph showing free disk space over the last week">
+    </div>
     </div>
 {% else %}
   <p>Metrics are not available for this service yet.</p>
