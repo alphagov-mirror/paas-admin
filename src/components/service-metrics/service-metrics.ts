@@ -1,30 +1,42 @@
-import { IContext } from '../app';
+import * as cw from '@aws-sdk/client-cloudwatch-node';
+
 import CloudFoundryClient from '../../lib/cf';
-import { CLOUD_CONTROLLER_ADMIN, CLOUD_CONTROLLER_GLOBAL_AUDITOR, CLOUD_CONTROLLER_READ_ONLY_ADMIN } from '../auth';
 import { IParameters, IResponse } from '../../lib/router';
+import { IContext } from '../app';
+import { CLOUD_CONTROLLER_ADMIN, CLOUD_CONTROLLER_GLOBAL_AUDITOR, CLOUD_CONTROLLER_READ_ONLY_ADMIN } from '../auth';
 import { fromOrg, IBreadcrumb } from '../breadcrumbs';
 import serviceMetricsTemplate from './service-metrics.njk';
-import * as cw from "@aws-sdk/client-cloudwatch-node";
 
 export async function viewServiceMetricImage(ctx: IContext, params: IParameters): Promise<IResponse> {
-    const cloudWatch = new cw.CloudWatchClient({ region: 'eu-west-1' })
+    const cloudWatch = new cw.CloudWatchClient({ region: 'eu-west-1' });
     const cmd = new cw.GetMetricWidgetImageCommand({
-        MetricWidget: JSON.stringify({
-          metrics: [
-            [ "AWS/RDS", params.metricDimension, "DBInstanceIdentifier", `rdsbroker-${params.serviceGUID}` ],
-          ],
-          yAxis: {left: { min: 0} },
-          start: "-PT168H",
-          title: " ",
-          legend: {position: "hidden"},
-        })
-      })
-    const data = await cloudWatch.send(cmd)
+      MetricWidget: JSON.stringify({
+        metrics: [
+          [ 'AWS/RDS', params.metricDimension, 'DBInstanceIdentifier', `rdsbroker-${params.serviceGUID}` ],
+        ],
+        yAxis: {left: { min: 0} },
+        start: '-PT1W',
+        title: ' ',
+        legend: {position: 'hidden'},
+      }),
+    });
 
-    return {
-        body: Buffer.from(data.MetricWidgetImage!),
-        mimeType: 'image/png',
-    };
+    try {
+      const data = await cloudWatch.send(cmd);
+      if (!data.MetricWidgetImage) {
+        throw new Error('Expected MetricWidgetImage to be set')
+      }
+      return {
+          body: Buffer.from(data.MetricWidgetImage),
+          mimeType: 'image/png',
+      };
+    } catch (err) {
+      ctx.app.logger.error('failed to get metric widget image', err);
+      return {
+          body: Buffer.from(''),
+          mimeType: 'image/png',
+      };
+    }
 }
 
 export async function viewServiceMetrics(ctx: IContext, params: IParameters): Promise<IResponse> {

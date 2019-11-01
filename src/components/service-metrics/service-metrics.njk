@@ -5,18 +5,19 @@
 {% endblock %}
 
 {% block insideTabs %}
-    <h2 className="govuk-heading-m">Metrics</h2>
+<h2 className="govuk-heading-m">Metrics</h2>
 
-    <div className="govuk-grid-row">
-    <div className="govuk-grid-column-one-third">
-        <h3 className="govuk-heading-m">
-        Free disk space
-        </h3>
+<div className="govuk-grid-row">
+  <div className="govuk-grid-column-one-third">
+    <h3 className="govuk-heading-m">
+    Free disk space
+    </h3>
 
-        <img src="{{
-        linkTo(
-          'admin.organizations.spaces.services.metrics.view.image',
-          {organizationGUID: organization.metadata.guid, spaceGUID: space.metadata.guid, serviceGUID: service.metadata.guid, metricDimension: 'FreeStorageSpace' }
-        ) }}" alt="Graph showing free disk space over the last week">
-    </div>
-    {% endblock %}
+    <img src="{{
+    linkTo(
+      'admin.organizations.spaces.services.metrics.view.image',
+      {organizationGUID: organization.metadata.guid, spaceGUID: space.metadata.guid, serviceGUID: service.metadata.guid, metricDimension: 'FreeStorageSpace' }
+    ) }}" alt="Graph showing free disk space over the last week">
+  </div>
+</div>
+{% endblock %}
