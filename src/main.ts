@@ -98,6 +98,7 @@ async function main() {
     notifyWelcomeTemplateID: process.env.NOTIFY_WELCOME_TEMPLATE_ID || null,
     oidcProviders: providers,
     domainName: expectEnvVariable('DOMAIN_NAME'),
+    adminFee: .1,
   };
 
   const server = new Server(app(config), {
