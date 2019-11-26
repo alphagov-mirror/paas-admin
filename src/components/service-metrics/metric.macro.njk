@@ -18,19 +18,59 @@
           <tbody class="govuk-table__body">
             <tr class="govuk-table__row">
               <th scope="row" class="govuk-table__header"><small>Current</small></th>
-              <td class="govuk-table__cell govuk-table__cell--numeric"><small>{{ series.summary.current | round(2) }}</small></td>
+              <td class="govuk-table__cell govuk-table__cell--numeric">
+                <small>
+                  {% if params.format === 'bytes' %}
+                    {{ series.summary.current | bytestohuman | safe }}
+                  {% elseif params.format === 'percentile' %}
+                    {{ series.summary.current | round(2) }}%
+                  {% else %}
+                    {{ series.summary.current | round(2) }}
+                  {% endif %}
+                </small>
+              </td>
             </tr>
             <tr class="govuk-table__row">
               <th scope="row" class="govuk-table__header"><small>Average</small></th>
-              <td class="govuk-table__cell govuk-table__cell--numeric"><small>{{ series.summary.average | round(2) }}</small></td>
+              <td class="govuk-table__cell govuk-table__cell--numeric">
+                <small>
+                  {% if params.format === 'bytes' %}
+                    {{ series.summary.average | bytestohuman | safe }}
+                  {% elseif params.format === 'percentile' %}
+                    {{ series.summary.average | round(2) }}%
+                  {% else %}
+                    {{ series.summary.average | round(2) }}
+                  {% endif %}
+                </small>
+              </td>
             </tr>
             <tr class="govuk-table__row">
               <th scope="row" class="govuk-table__header"><small>Min</small></th>
-              <td class="govuk-table__cell govuk-table__cell--numeric"><small>{{ series.summary.min | round(2) }}</small></td>
+              <td class="govuk-table__cell govuk-table__cell--numeric">
+                <small>
+                  {% if params.format === 'bytes' %}
+                    {{ series.summary.min | bytestohuman | safe }}
+                  {% elseif params.format === 'percentile' %}
+                    {{ series.summary.min | round(2) }}%
+                  {% else %}
+                    {{ series.summary.min | round(2) }}
+                  {% endif %}
+                </small>
+              </td>
             </tr>
             <tr class="govuk-table__row">
               <th scope="row" class="govuk-table__header"><small>Max</small></th>
-              <td class="govuk-table__cell govuk-table__cell--numeric"><small>{{ series.summary.max | round(2) }}</small></td>
+              <td class="govuk-table__cell govuk-table__cell--numeric">
+                <small>
+                  {% if params.format === 'bytes' %}
+                    {{ series.summary.max | bytestohuman | safe }}
+                  {% elseif params.format === 'percentile' %}
+                    {{ series.summary.max | round(2) }}%
+                  {% else %}
+                    {{ series.summary.max | round(2) }}
+                  {% endif %}
+                </small>
+              </td>
             </tr>
           </tbody>
         </table>
