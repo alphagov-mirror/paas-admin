@@ -11,5 +11,30 @@
 
         <div>{{ params.metric.graph | safe }}</div>
     </div>
+    <div class="govuk-grid-column-one-third govuk-!-padding-top-4">
+      {% for series in params.metric.data.seriesArray %}
+        <table class="govuk-table">
+          <caption class="govuk-table__caption">{{ series.label | default('Instance') }}</caption>
+          <tbody class="govuk-table__body">
+            <tr class="govuk-table__row">
+              <th scope="row" class="govuk-table__header"><small>Current</small></th>
+              <td class="govuk-table__cell govuk-table__cell--numeric"><small>{{ series.summary.current | round(2) }}</small></td>
+            </tr>
+            <tr class="govuk-table__row">
+              <th scope="row" class="govuk-table__header"><small>Average</small></th>
+              <td class="govuk-table__cell govuk-table__cell--numeric"><small>{{ series.summary.average | round(2) }}</small></td>
+            </tr>
+            <tr class="govuk-table__row">
+              <th scope="row" class="govuk-table__header"><small>Min</small></th>
+              <td class="govuk-table__cell govuk-table__cell--numeric"><small>{{ series.summary.min | round(2) }}</small></td>
+            </tr>
+            <tr class="govuk-table__row">
+              <th scope="row" class="govuk-table__header"><small>Max</small></th>
+              <td class="govuk-table__cell govuk-table__cell--numeric"><small>{{ series.summary.max | round(2) }}</small></td>
+            </tr>
+          </tbody>
+        </table>
+      {% endfor %}
+    </div>
   </div>
 {% endmacro %}

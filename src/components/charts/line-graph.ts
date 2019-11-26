@@ -11,6 +11,12 @@ import moment from 'moment';
 export interface IMetricSeries {
   metrics: ReadonlyArray<IMetric>;
   label: string;
+  summary?: {
+    readonly current: number;
+    readonly average: number;
+    readonly min: number;
+    readonly max: number;
+  };
 }
 
 export interface IMetricGraphData {
@@ -49,7 +55,28 @@ const padding = {
 export function drawMultipleLineGraphs(metricGraphData: ReadonlyArray<IMetricGraphData>): IGraphByID {
   return metricGraphData.reduce((acc, data) => ({
     ...acc,
-    [data.id]: { graph: drawLineGraph(data).outerHTML },
+    [data.id]: {
+      graph: drawLineGraph(data).outerHTML,
+      data: {
+        ...data,
+        seriesArray: data.seriesArray.reduce((all: ReadonlyArray<IMetricSeries>, series) => {
+          const maxMetric = series.metrics.reduce((value, m) => m.value > value ? m.value : value, 0);
+          return [
+            ...all,
+            {
+              ...series,
+              summary: {
+                current: series.metrics.reduce((value, m) => !isNaN(m.value) ? m.value : value, 0),
+                average: series.metrics.reduce((total, m) => total + (m.value || 0), 0)
+                  / series.metrics.filter(m => !isNaN(m.value)).length,
+                min: series.metrics.reduce((value, m) => m.value < value ? m.value : value, maxMetric),
+                max: maxMetric,
+              },
+            },
+          ];
+        }, []),
+      },
+    },
   }), {});
 }
 
