@@ -292,7 +292,7 @@ export default class CloudFoundryClient {
     return response.data;
   }
 
-  public async services(
+  public async spaceServices(
     spaceGUID: string,
   ): Promise<ReadonlyArray<cf.IServiceInstance>> {
     const response = await this.request(
