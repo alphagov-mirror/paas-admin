@@ -1,3 +1,7 @@
+interface IBag {
+  readonly [key: string]: any;
+}
+
 export interface IMetadata {
   readonly guid: string;
   readonly url: string;
@@ -261,7 +265,7 @@ export interface IService {
     readonly bindable: boolean;
     readonly description: string;
     readonly documentation_url: string | null;
-    readonly extra: string | null;
+    readonly extra: IBag | null;
     readonly info_url: string | null;
     readonly label: string;
     readonly long_description: string | null;
