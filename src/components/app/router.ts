@@ -3,6 +3,7 @@ import Router, { IParameters } from '../../lib/router';
 import * as account from '../account';
 import * as applicationEvents from '../application-events';
 import * as applications from '../applications';
+import * as marketplace from '../marketplace';
 import * as orgUsers from '../org-users';
 import * as organizations from '../organizations';
 import * as platformAdmin from '../platform-admin';
@@ -239,6 +240,16 @@ const router = new Router([
     method: 'post',
     name: 'platform-admin.redirect',
     path: '/platform-admin',
+  },
+  {
+    action: marketplace.listServices,
+    name: 'marketplace.view',
+    path: '/marketplace',
+  },
+  {
+    action: marketplace.viewService,
+    name: 'marketplace.service',
+    path: '/marketplace/:serviceGUID',
   },
 ]);
 

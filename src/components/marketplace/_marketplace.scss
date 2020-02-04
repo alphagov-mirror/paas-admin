@@ -1,0 +1,52 @@
+.marketplace-list, .service-details {
+  figure {
+    display: block;
+
+    div {
+      display: inline-block;
+      height: 100px;
+      margin-bottom: 1rem;
+
+      img {
+        max-height: 100%;
+        max-width: 100%;
+      }
+    }
+  }
+}
+
+.marketplace-list {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-gap: .5rem;
+
+  li {
+    box-sizing: border-box;
+    margin: 0;
+    text-align: center;
+
+    a {
+      border: 5px solid transparent;
+      display: inline-block;
+      width: 100%;
+
+      &:hover:not(:focus) {
+        background: govuk-colour("light-grey");
+      }
+
+      &:focus {
+        background-color: transparent;
+        border-color: govuk-colour("yellow");
+        box-shadow: none;
+      }
+    }
+  }
+}
+
+.service-details {
+  figure {
+    div {
+      height: auto;
+    }
+  }
+}
