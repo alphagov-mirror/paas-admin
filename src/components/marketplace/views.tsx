@@ -14,14 +14,46 @@ import redisLogo from './icons/redis.png';
 import s3Logo from './icons/s3.png';
 
 interface IV3ServiceEnchanced extends IV3Service {
-  readonly additionalMetadata: {
+  readonly parameters: {
     readonly [key: string]: any;
   };
 }
 
+interface IEnchancedServicePlan extends IServicePlan {
+  readonly parameters: {
+    readonly [key: string]: any;
+  };
+}
+
+interface ICustomMetadata {
+  readonly backups?: boolean;
+  readonly bullets?: ReadonlyArray<string>;
+  readonly concurrentConnections?: number;
+  readonly costs?: ReadonlyArray<{
+    readonly amount: {
+      readonly usd: number;
+    };
+    readonly unit: string;
+  }>;
+  readonly displayName?: string;
+  readonly encrypted?: boolean;
+  readonly highlyAvailable?: boolean;
+  readonly memory?: {
+    readonly amount: number;
+    readonly unit: string;
+  };
+  readonly storage?: {
+    readonly amount: number;
+    readonly unit: string;
+  };
+}
+
 interface IMarketplaceItemPageProperties {
+  readonly linkTo: RouteLinker;
   readonly service: IV3ServiceEnchanced;
-  readonly plans: ReadonlyArray<IServicePlan>;
+  readonly plans: ReadonlyArray<IEnchancedServicePlan>;
+  readonly version?: string;
+  readonly versions: ReadonlyArray<string>;
 }
 
 interface IMarketplacePageProperties {
@@ -38,10 +70,6 @@ interface IServiceDetails {
   };
 }
 
-interface IPlanProperties {
-  readonly plan: IServicePlan;
-}
-
 interface ILogoProperties {
   readonly image: string;
   readonly imageTitle: string;
@@ -49,7 +77,11 @@ interface ILogoProperties {
 }
 
 interface IPlanTabProperties {
-  readonly plans: ReadonlyArray<IServicePlan>;
+  readonly linkTo: RouteLinker;
+  readonly plans: ReadonlyArray<IEnchancedServicePlan>;
+  readonly serviceGUID: string;
+  readonly version?: string;
+  readonly versions: ReadonlyArray<string>;
 }
 
 interface ITabProperties {
@@ -58,98 +90,48 @@ interface ITabProperties {
   readonly children: string;
 }
 
+interface ITableRowProperties {
+  readonly data: ICustomMetadata;
+  readonly name: string;
+  readonly canBeHighlyAvailable: boolean;
+  readonly providesBackups: boolean;
+  readonly canBeEncrypted: boolean;
+  readonly limitsMemory: boolean;
+  readonly limitsStorage: boolean;
+  readonly hasCosts: boolean;
+  readonly limitsConcurrentConnections: boolean;
+}
+
 const serviceDetails: IServiceDetails = {
   'cdn-route': {
-    description: `Content Distribution Network (CDN) is a geographically distributed network of proxy servers and their 
-    data centers. The goal is to provide high availability and high performance by distributing the service spatially
-    relative to end-users.`,
     image: cdnLogo,
     imageTitle: 'Amazon Web Services - CloudFront - Official Logo',
-    usecase: [
-      'Bring your own Domain',
-      'Highly available static content distribution',
-    ],
   },
   'postgres': {
-    description: `Postgres, is a free and open-source relational database management system (RDBMS) emphasizing
-    extensibility and technical standards compliance. It is designed to handle a range of workloads, from single
-    machines to data warehouses or Web services with many concurrent users.`,
     image: postgresLogo,
     imageTitle: 'PostgreSQL - Official Logo',
   },
   'mysql': {
-    description: 'MySQL is an open-source relational database management system (RDBMS).',
     image: mysqlLogo,
     imageTitle: 'MySQL - Official Logo',
   },
   'aws-s3-bucket': {
-    description: `Amazon Simple Storage Service (AWS S3) is a service offered by Amazon Web Services (AWS) that provides
-    object storage through a web service interface.`,
     image: s3Logo,
     imageTitle: 'Amazon Web Services - S3 Bucket - Official Logo',
-    usecase: [
-      'Assets storage',
-      'File Uploads persistance',
-    ],
   },
   'redis': {
-    description: `Redis is an in-memory data structure project implementing a distributed, in-memory key-value database
-    with optional durability. Redis supports different kinds of abstract data structures, such as strings, lists, maps,
-    sets, sorted sets, HyperLogLogs, bitmaps, streams, and spatial indexes.`,
     image: redisLogo,
     imageTitle: 'Redis - Official Logo',
-    usecase: [
-      'Cache',
-      'Session management',
-      'Queues',
-    ],
   },
   'elasticsearch': {
-    description: `Elasticsearch is a search engine based on the Lucene library. It provides a distributed,
-    multitenant-capable full-text search engine with an HTTP web interface and schema-free JSON documents.`,
     image: elasticsearchLogo,
     imageTitle: 'ElasticSearch - Official Logo',
-    usecase: [
-      'Search engines',
-    ],
   },
   'influxdb': {
-    description: `InfluxDB is optimized for fast, high-availability storage and retrieval of time series data in fields
-    such as operations monitoring, application metrics, Internet of Things sensor data, and real-time analytics. It also
-    has support for processing data from Graphite.`,
     image: influxdbLogo,
     imageTitle: 'InfluxDB - Official Logo',
-    usecase: [
-      'Metrics',
-      'Prometheus',
-      'Grafana',
-    ],
   },
 };
-
-function planStorage(plan: IServicePlan): string {
-  const matches = plan.entity.description.match(/([0-9]+[A-Z]+) Storage/);
-
-  return (matches && matches[1]) || 'N/A';
-}
-
-function planConnections(plan: IServicePlan): string {
-  const matches = plan.entity.description.match(/([0-9]+) Concurrent Connections/);
-
-  return (matches && matches[1]) || 'N/A';
-}
-
-function planCost(plan: IServicePlan): string {
-  const metadata = plan.entity.extra?.costs;
-  if (!metadata) {
-    return 'free';
-  }
-
-  const cost = metadata[0]?.amount.usd;
-  const period = metadata[0]?.unit.toLowerCase();
-
-  return `$${cost} per ${period}`;
-}
 
 export function Tab(props: ITabProperties): ReactElement {
   const classess = ['govuk-tabs__list-item'];
@@ -166,67 +148,121 @@ export function Tab(props: ITabProperties): ReactElement {
   );
 }
 
+function TableRow(props: ITableRowProperties): ReactElement {
+  const costs = props.data.costs || [];
+
+  return (
+    <tr className="govuk-table__row">
+      <th scope="row" className="govuk-table__header">{props.name}</th>
+
+      {props.canBeHighlyAvailable
+        ? <td className="govuk-table__cell">
+            {props.data.highlyAvailable ? <Tick /> : null}
+          </td>
+        : null}
+      {props.providesBackups
+        ? <td className="govuk-table__cell">
+            {props.data.backups ? <Tick /> : null}
+          </td>
+        : null}
+      {props.canBeEncrypted
+        ? <td className="govuk-table__cell">
+            {props.data.encrypted ? <Tick /> : null}
+          </td>
+        : null}
+      {props.limitsConcurrentConnections
+        ? <td className="govuk-table__cell govuk-table__cell--numeric">
+            {props.data.concurrentConnections}
+          </td>
+        : null}
+      {props.limitsMemory
+        ? <td className="govuk-table__cell govuk-table__cell--numeric">
+            {props.data.memory?.amount}
+            {props.data.memory?.unit}
+          </td>
+        : null}
+      {props.limitsStorage
+        ? <td className="govuk-table__cell govuk-table__cell--numeric">
+            {props.data.storage?.amount}
+            {props.data.storage?.unit}
+          </td>
+        : null}
+      {props.hasCosts
+        ? <td className="govuk-table__cell govuk-table__cell--numeric">
+            {costs[0]?.amount.usd}
+            {costs[0]?.unit}
+          </td>
+        : null}
+    </tr>
+  );
+}
+
 export function PlanTab(props: IPlanTabProperties): ReactElement {
+  const canBeHA = props.plans.some(plan => plan?.parameters.AdditionalMetadata?.highlyAvailable !== undefined);
+  const providesBackups = props.plans.some(plan => plan?.parameters.AdditionalMetadata?.backups !== undefined);
+  const canBeEncrypted = props.plans.some(plan => plan?.parameters.AdditionalMetadata?.encrypted !== undefined);
+  const limitsMemory = props.plans.some(plan => plan?.parameters.AdditionalMetadata?.memory !== undefined);
+  const limitsStorage = props.plans.some(plan => plan?.parameters.AdditionalMetadata?.storage !== undefined);
+  const hasCosts = props.plans.some(plan => plan?.parameters.AdditionalMetadata?.costs !== undefined);
+  const limitsCC = props.plans.some(plan => plan?.parameters.AdditionalMetadata?.concurrentConnections !== undefined);
+
   return (
     <div className="govuk-tabs" data-module="govuk-tabs">
       <h2 className="govuk-tabs__title">Contents</h2>
 
       <ul className="govuk-tabs__list">
-        <Tab
-          active={false}
-          href="#"
-        >
-          Version 11
-        </Tab>
-        <Tab
-          active={true}
-          href="#"
-        >
-          Version 10
-        </Tab>
-        <Tab
-          active={false}
-          href="#"
-        >
-          Version 9
-        </Tab>
+        {props.versions.map((version, index) => (
+          <Tab key={index} active={version === props.version} href={props.linkTo('marketplace.service', {
+            serviceGUID: props.serviceGUID,
+            version,
+          })}>
+            {`Version ${version}`}
+          </Tab>
+        ))}
       </ul>
 
       <section className="govuk-tabs__panel">
         <table className="govuk-table">
-          <caption className="govuk-table__caption">Version 10</caption>
+          <caption className="govuk-table__caption">Version {props.version}</caption>
           <thead className="govuk-table__head">
             <tr className="govuk-table__row">
               <th scope="col" className="govuk-table__header">Plan</th>
-              <th scope="col" className="govuk-table__header">Highly Available</th>
-              <th scope="col" className="govuk-table__header">Backups</th>
-              <th scope="col" className="govuk-table__header">Encrypted</th>
-              <th scope="col" className="govuk-table__header govuk-table__header--numeric">Connections</th>
-              <th scope="col" className="govuk-table__header govuk-table__header--numeric">Space</th>
-              <th scope="col" className="govuk-table__header govuk-table__header--numeric">Price</th>
+              {canBeHA
+                ? <th scope="col" className="govuk-table__header">Highly Available</th>
+                : null}
+              {providesBackups
+                ? <th scope="col" className="govuk-table__header">Backups</th>
+                : null}
+              {canBeEncrypted
+                ? <th scope="col" className="govuk-table__header">Encrypted</th>
+                : null}
+              {limitsCC
+                ? <th scope="col" className="govuk-table__header govuk-table__header--numeric">Connections</th>
+                : null}
+              {limitsMemory
+                ? <th scope="col" className="govuk-table__header govuk-table__header--numeric">Memory</th>
+                : null}
+              {limitsStorage
+                ? <th scope="col" className="govuk-table__header govuk-table__header--numeric">Space</th>
+                : null}
+              {hasCosts
+                ? <th scope="col" className="govuk-table__header govuk-table__header--numeric">Price</th>
+                : null}
             </tr>
           </thead>
           <tbody className="govuk-table__body">
             {props.plans.map((plan, index) => (
-              <tr className="govuk-table__row" key={index}>
-                <th scope="row" className="govuk-table__header">{plan.entity.name}</th>
-                <td className="govuk-table__cell">{plan.entity.name.includes('ha') ? <Tick /> : null}</td>
-                <td className="govuk-table__cell">
-                  {!plan.entity.description.includes('NOT BACKED UP') ? <Tick /> : null}
-                </td>
-                <td className="govuk-table__cell">
-                  {plan.entity.description.includes('Encrypted') ? <Tick /> : null}
-                </td>
-                <td className="govuk-table__cell govuk-table__cell--numeric">
-                  {planConnections(plan)}
-                </td>
-                <td className="govuk-table__cell govuk-table__cell--numeric">
-                  {planStorage(plan)}
-                </td>
-                <td className="govuk-table__cell govuk-table__cell--numeric">
-                  {planCost(plan)}
-                </td>
-              </tr>
+              <TableRow key={index}
+                data={plan.parameters.AdditionalMetadata || {}}
+                name={plan.parameters.displayName || plan.entity.name}
+                canBeHighlyAvailable={canBeHA}
+                providesBackups={providesBackups}
+                canBeEncrypted={canBeEncrypted}
+                limitsMemory={limitsMemory}
+                limitsStorage={limitsStorage}
+                hasCosts={hasCosts}
+                limitsConcurrentConnections={limitsCC}
+              />
             ))}
           </tbody>
         </table>
@@ -253,16 +289,16 @@ export function MarketplaceItemPage(props: IMarketplaceItemPageProperties): Reac
       <div className="govuk-grid-column-two-thirds">
         <h1 className="govuk-heading-xl">
           <span className="govuk-caption-xl">GOV.UK PaaS Marketplace</span>
-          {props.service.additionalMetadata.displayName || props.service.name}
+          {props.service.parameters.displayName || props.service.name}
         </h1>
 
-        <p className="govuk-body">{serviceDetails[props.service.name]?.description || props.service.description}</p>
+        <p className="govuk-body">{props.service.parameters.longDescription}</p>
 
         <dl className="govuk-summary-list govuk-summary-list--no-border">
-          {props.service.additionalMetadata.providerDisplayName ? <div className="govuk-summary-list__row">
+          {props.service.parameters.providerDisplayName ? <div className="govuk-summary-list__row">
             <dt className="govuk-summary-list__key">Provider</dt>
             <dd className="govuk-summary-list__value">
-              {props.service.additionalMetadata.providerDisplayName}
+              {props.service.parameters.providerDisplayName}
             </dd>
           </div> : null}
 
@@ -275,12 +311,22 @@ export function MarketplaceItemPage(props: IMarketplaceItemPageProperties): Reac
             </dd>
           </div> : null}
 
-          {props.service.additionalMetadata.documentationUrl ? <div className="govuk-summary-list__row">
+          {props.service.parameters.documentationUrl ? <div className="govuk-summary-list__row">
             <dt className="govuk-summary-list__key">Documentation</dt>
             <dd className="govuk-summary-list__value">
-              <a href={props.service.additionalMetadata.documentationUrl} className="govuk-link">
-                {props.service.additionalMetadata.documentationUrl}
-              </a>
+              <ul className="govuk-list">
+                <li>
+                  <a href={props.service.parameters.documentationUrl} className="govuk-link">
+                    {props.service.parameters.documentationUrl}
+                  </a>
+                </li>
+                {props.service.parameters.AdditionalMetadata?.otherDocumentation?.map(
+                  (docs: string, index: number) => (
+                    <li key={index}>
+                      <a href={docs} className="govuk-link">{docs}</a>
+                    </li>
+                  ))}
+              </ul>
             </dd>
           </div> : null}
 
@@ -303,7 +349,15 @@ export function MarketplaceItemPage(props: IMarketplaceItemPageProperties): Reac
       </div>
 
       <div className="govuk-grid-column-full">
-        <PlanTab plans={props.plans.filter(plan => plan.entity.name.includes('10'))} />
+        <PlanTab
+          linkTo={props.linkTo}
+          plans={props.version
+            ? props.plans.filter(plan => plan.parameters.AdditionalMetadata.version === props.version)
+            : props.plans}
+          serviceGUID={props.service.guid}
+          version={props.version}
+          versions={props.versions}
+        />
 
         <CommandLineAlternative>{`cf marketplace -s ${props.service.name}`}</CommandLineAlternative>
       </div>
@@ -332,9 +386,9 @@ export function MarketplacePage(props: IMarketplacePageProperties): ReactElement
                 serviceGUID: service.guid,
               })} className="govuk-link">
                 <Logo
-                  image={serviceDetails[service.name].image || cloudLogo}
-                  imageTitle={`${serviceDetails[service.name].imageTitle || 'Missing service logo'}`}
-                  label={service.additionalMetadata.displayName || service.name}
+                  image={serviceDetails[service.name]?.image || cloudLogo}
+                  imageTitle={`${serviceDetails[service.name]?.imageTitle || 'Missing service logo'}`}
+                  label={service.parameters.displayName || service.name}
                 />
               </a>
             </li>

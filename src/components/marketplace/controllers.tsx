@@ -16,7 +16,7 @@ export async function listServices(ctx: IContext, _params: IParameters): Promise
   const rawServices = await cf.services();
   const services = rawServices.map(service => ({
     ...service,
-    additionalMetadata: JSON.parse(service.broker_service_offering_metadata),
+    parameters: JSON.parse(service.broker_service_offering_metadata),
   }));
 
   const template = new Template(ctx.viewContext, 'Marketplace');
@@ -36,19 +36,30 @@ export async function viewService(ctx: IContext, params: IParameters): Promise<I
     logger: ctx.app.logger,
   });
 
-  const [rawService, plans] = await Promise.all([
+  const [rawService, rawPlans] = await Promise.all([
     cf.v3service(params.serviceGUID),
     cf.servicePlans(params.serviceGUID),
   ]);
 
   const service = {
     ...rawService,
-    additionalMetadata: JSON.parse(rawService.broker_service_offering_metadata),
+    parameters: JSON.parse(rawService.broker_service_offering_metadata),
   };
+
+  const plans = rawPlans
+    .filter(plan => plan.entity.active)
+    .map(plan => ({
+      ...plan,
+      parameters: JSON.parse(plan.entity.extra),
+    }));
+
+  const versions = [...new Set(plans.map(plan => plan.parameters.AdditionalMetadata?.version))]
+    .sort()
+    .reverse();
 
   const template = new Template(
     ctx.viewContext,
-    `Marketplace - Service - ${service.additionalMetadata.displayName || service.name}`,
+    `Marketplace - Service - ${service.parameters.displayName || service.name}`,
   );
 
   template.breadcrumbs = [
@@ -57,14 +68,17 @@ export async function viewService(ctx: IContext, params: IParameters): Promise<I
       href: ctx.linkTo('marketplace.view'),
     },
     {
-      text: service.additionalMetadata.displayName || service.name,
+      text: service.parameters.displayName || service.name,
     },
   ];
 
   return {
     body: template.render(<MarketplaceItemPage
+      linkTo={ctx.linkTo}
       service={service}
       plans={plans}
+      version={params.version || versions[0]}
+      versions={versions}
     />),
   };
 }

@@ -325,7 +325,7 @@ export interface IServicePlan {
     readonly active: boolean;
     readonly bindable: boolean;
     readonly description: string;
-    readonly extra: IBag | null;
+    readonly extra: string;
     readonly free: boolean;
     readonly name: string;
     readonly public: boolean;
