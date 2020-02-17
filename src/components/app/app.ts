@@ -14,6 +14,7 @@ import { internalServerErrorMiddleware } from '../errors';
 import { termsCheckerMiddleware } from '../terms';
 
 import { getCalculator } from '../calculator';
+import { ILog } from '../changelog/views';
 import csp from './app.csp';
 import { initContext } from './context';
 import router from './router';
@@ -24,6 +25,7 @@ export interface IAppConfig {
   readonly billingAPI: string;
   readonly accountsAPI: string;
   readonly accountsSecret: string;
+  readonly changelog: ReadonlyArray<ILog>;
   readonly cloudFoundryAPI: string;
   readonly location: string;
   readonly logger: BaseLogger;

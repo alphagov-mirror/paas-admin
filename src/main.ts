@@ -1,3 +1,9 @@
+import fs from 'fs';
+import path from 'path';
+import { promisify } from 'util';
+
+import frontMatter from 'front-matter';
+import glob from 'glob';
 import pino from 'pino';
 import sourceMapSupport from 'source-map-support';
 
@@ -9,6 +15,7 @@ import app, {
 import CloudFoundryClient from './lib/cf';
 
 import Server from './server';
+import { parseContents } from './components/changelog';
 
 const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
@@ -84,6 +91,13 @@ async function main() {
       'https://accounts.google.com/.well-known/openid-configuration',
   });
 
+  const changelogFilenames = await promisify(glob)(path.resolve(process.cwd(), 'changelog', '**', '*.md'));
+  const changelogFiles = await Promise.all(
+    changelogFilenames
+      .filter(filename => !filename.includes('0-template.md'))
+      .map(async filename => await promisify(fs.readFile)(filename)),
+  );
+
   const config: IAppConfig = {
     logger,
     sessionSecret: process.env.SESSION_SECRET || 'mysecret',
@@ -109,6 +123,7 @@ async function main() {
     prometheusEndpoint: expectEnvVariable('PROMETHEUS_ENDPOINT'),
     prometheusUsername: expectEnvVariable('PROMETHEUS_USERNAME'),
     prometheusPassword: expectEnvVariable('PROMETHEUS_PASSWORD'),
+    changelog: changelogFiles.map(file => parseContents(file.toString())),
   };
 
   const server = new Server(app(config), {
