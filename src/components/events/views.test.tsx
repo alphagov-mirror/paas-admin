@@ -8,7 +8,7 @@ import { spacesMissingAroundInlineElements } from '../../layouts/react-spacing.t
 import { IAccountsUser } from '../../lib/accounts';
 import { IAuditEvent, IAuditEventActorTarget } from '../../lib/cf/types';
 
-import { Details, Event, TargetedEvent, Totals } from './views';
+import { Details, Event, TargetedEvent, Totals, EventTimestamps } from './views';
 
 describe(Details, () => {
   it('should display details element', () => {
@@ -145,6 +145,17 @@ describe(Totals, () => {
     const $ = cheerio.load(markup.html());
     expect($('p').text()).toContain(
       'There are 5 total events. Displaying page 1 of 1.',
+    );
+    expect(spacesMissingAroundInlineElements($.html())).toHaveLength(0);
+  });
+});
+
+describe(EventTimestamps, () => {
+  it('should display EventTimestamp element', () => {
+    const markup = shallow(<EventTimestamps />);
+    const $ = cheerio.load(markup.html());
+    expect($('p').text()).toContain(
+      'Event timestamps are in UTC format.',
     );
     expect(spacesMissingAroundInlineElements($.html())).toHaveLength(0);
   });
