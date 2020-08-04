@@ -2,6 +2,7 @@ import { groupBy, mapValues, values } from 'lodash';
 import React, { Fragment, ReactElement } from 'react';
 
 import { bytesToHuman } from '../../layouts/helpers';
+import { KIBIBYTE } from '../../layouts/constants';
 
 export interface IQuote {
   readonly events: ReadonlyArray<IBillableEvent>;
@@ -92,12 +93,13 @@ function niceServiceName(planName: string): string {
 }
 
 function appInstanceDescription(memoryInMB: number, instances: number): ReactElement {
+  const precisionFactor = memoryInMB > KIBIBYTE && memoryInMB < KIBIBYTE * 2 ? 1 : 0;
   return <>
     {instances.toFixed(0)} app instance{instances === 1 ? '' : 's'}
     {' '}
     with
     {' '}
-    {bytesToHuman(memoryInMB * 1024 * 1024, 0)} of memory
+    {bytesToHuman(memoryInMB * 1024 * 1024, precisionFactor)} of memory
   </>;
 }
 
