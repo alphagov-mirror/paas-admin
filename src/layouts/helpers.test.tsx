@@ -1,8 +1,10 @@
+import cheerio from 'cheerio';
 import { shallow } from 'enzyme';
 import React from 'react';
 
 import { GIBIBYTE, KIBIBYTE, MEBIBYTE, TEBIBYTE } from './constants';
 import {
+  Abbreviation,
   bytesToHuman,
   capitalize,
   conditionallyDisplay,
@@ -18,24 +20,25 @@ describe(percentage, () => {
 
 describe(bytesToHuman, () => {
   it('should do the right thing', () => {
-    const bytes = <span>{bytesToHuman(5.3)}</span>;
-    const kibibytes = <span>{bytesToHuman(5.3 * KIBIBYTE)}</span>;
-    const mebibytes = <span>{bytesToHuman(5.3 * MEBIBYTE)}</span>;
-    const gibibytes = <span>{bytesToHuman(5.3 * GIBIBYTE)}</span>;
-    const tebibytes = <span>{bytesToHuman(5.3 * TEBIBYTE)}</span>;
-
-    expect(shallow(bytes).html()).toContain('5 <abbr title="bytes">B</abbr>');
-    expect(shallow(kibibytes).html()).toContain(
-      '5.30 <abbr title="kibibytes">KiB</abbr>',
+    const bytes = cheerio.load(shallow(<span>{bytesToHuman(5.3)}</span>).html());
+    const kibibytes = cheerio.load(shallow(<span>{bytesToHuman(5.3 * KIBIBYTE)}</span>).html());
+    const mebibytes = cheerio.load(shallow(<span>{bytesToHuman(5.3 * MEBIBYTE)}</span>).html());
+    const gibibytes = cheerio.load(shallow(<span>{bytesToHuman(5.3 * GIBIBYTE)}</span>).html());
+    const tebibytes = cheerio.load(shallow(<span>{bytesToHuman(5.3 * TEBIBYTE)}</span>).html());
+    expect(bytes('span').html()).toContain(
+      '5 <abbr role="tooltip" tabindex="0" data-module="tooltip" aria-label="bytes">B</abbr>',
     );
-    expect(shallow(mebibytes).html()).toContain(
-      '5.30 <abbr title="mebibytes">MiB</abbr>',
+    expect(kibibytes('span').html()).toContain(
+      '5.30 <abbr role="tooltip" tabindex="0" data-module="tooltip" aria-label="kibibytes">KiB</abbr>',
     );
-    expect(shallow(gibibytes).html()).toContain(
-      '5.30 <abbr title="gibibytes">GiB</abbr>',
+    expect(mebibytes('span').html()).toContain(
+      '5.30 <abbr role="tooltip" tabindex="0" data-module="tooltip" aria-label="mebibytes">MiB</abbr>',
     );
-    expect(shallow(tebibytes).html()).toContain(
-      '5.30 <abbr title="tebibytes">TiB</abbr>',
+    expect(gibibytes('span').html()).toContain(
+      '5.30 <abbr role="tooltip" tabindex="0" data-module="tooltip" aria-label="gibibytes">GiB</abbr>',
+    );
+    expect(tebibytes('span').html()).toContain(
+      '5.30 <abbr role="tooltip" tabindex="0" data-module="tooltip" aria-label="tebibytes">TiB</abbr>',
     );
   });
 });
@@ -53,5 +56,16 @@ describe(conditionallyDisplay, () => {
 describe(capitalize, () => {
   it('should do the right thing', () => {
     expect(capitalize('test')).toEqual('Test');
+  });
+});
+
+describe(Abbreviation, () => {
+  it('it should render the abbreviation tooltip correctly', () => {
+    const output = <Abbreviation description="For the win">FTW</Abbreviation>;
+    const $ = cheerio.load(shallow(output).html());
+    expect($('abbr').attr('tabindex')).toBe('0');
+    expect($('abbr').text()).toBe('FTW');
+    expect($('abbr').attr('aria-label')).toBe('For the win');
+    expect($('abbr').attr('role')).toBe('tooltip');
   });
 });
