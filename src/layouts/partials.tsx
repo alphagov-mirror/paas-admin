@@ -219,6 +219,14 @@ export function Footer(): ReactElement {
               <li className="govuk-footer__inline-list-item">
                 <a
                   className="govuk-footer__link"
+                  href="https://www.cloud.service.gov.uk/accessibility-statement"
+                >
+                  Accessibility statement
+                </a>
+              </li>
+              <li className="govuk-footer__inline-list-item">
+                <a
+                  className="govuk-footer__link"
                   href="https://www.cloud.service.gov.uk/cookies"
                 >
                   Cookies
